@@ -41,6 +41,13 @@ def obtener_categorias():
     return obtener_catalogo("categorias", "id, nombre, tipo_id")
 
 
+def _extraer_id(valor):
+    """Si el valor viene como [id, etiqueta] o (id, etiqueta), devuelve solo el id."""
+    if isinstance(valor, (list, tuple)):
+        return valor[0] if len(valor) > 0 else None
+    return valor
+
+
 def validar_movimiento(tipo_id, cuenta_origen_id, cuenta_destino_id,
                         persona_origen_id, persona_destino_texto, monto):
     """
@@ -82,6 +89,13 @@ def insertar_movimiento(fecha, tipo_id, cuenta_origen_id, cuenta_destino_id,
                          persona_origen_id, persona_destino_texto, medio_id,
                          categoria_id, monto, codigo_transaccion, nota):
     """Valida e inserta un movimiento. Devuelve (True, "") o (False, "error")."""
+    tipo_id = _extraer_id(tipo_id)
+    cuenta_origen_id = _extraer_id(cuenta_origen_id)
+    cuenta_destino_id = _extraer_id(cuenta_destino_id)
+    persona_origen_id = _extraer_id(persona_origen_id)
+    medio_id = _extraer_id(medio_id)
+    categoria_id = _extraer_id(categoria_id)
+
     ok, msg = validar_movimiento(
         tipo_id, cuenta_origen_id, cuenta_destino_id,
         persona_origen_id, persona_destino_texto, monto

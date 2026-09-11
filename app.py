@@ -22,6 +22,13 @@ personas = [[p[0], p[1]] for p in logica.obtener_personas()]
 medios = [[m[0], m[1]] for m in logica.obtener_medios()]
 categorias_todas = [[c[0], c[1], c[2]] for c in logica.obtener_categorias()]
 
+# Mapa de tipo_id -> nombre, para armar la etiqueta "Categoría (Tipo)"
+_nombre_tipo_por_id = {t[0]: t[1] for t in tipos}
+categorias_lov = [
+    [c[0], f"{c[1]} ({_nombre_tipo_por_id.get(c[2], '?')})"]
+    for c in categorias_todas
+]
+
 # ---------- Variables de estado del formulario ----------
 fecha_mov = date.today()
 tipo_sel = tipos[0][0]  # id del tipo seleccionado (arranca en "Ingreso")
@@ -35,25 +42,13 @@ monto_str = ""
 codigo_transaccion = ""
 nota = ""
 
-# Categorías filtradas según el tipo (se recalcula cuando cambia tipo_sel)
-categorias_filtradas = [[c[0], c[1]] for c in categorias_todas if c[2] == tipo_sel]
+categoria_sel = categorias_lov[0][0] if categorias_lov else None
 
 mensaje_resultado = ""
 
 
-def actualizar_categorias(state):
-    """Filtra las categorías disponibles según el tipo de movimiento elegido."""
-    state.categorias_filtradas = [
-        [c[0], c[1]] for c in categorias_todas if c[2] == state.tipo_sel
-    ]
-    if state.categorias_filtradas:
-        state.categoria_sel = state.categorias_filtradas[0][0]
-    else:
-        state.categoria_sel = None
-
-
 def on_change_tipo(state, var_name, value):
-    actualizar_categorias(state)
+    pass  # ya no se necesita filtrar categorías, se mantiene por si se agregan otros efectos a futuro
 
 
 def limpiar_formulario(state):
@@ -105,16 +100,16 @@ pagina_formulario = """
 <|{fecha_mov}|date|>
 
 **Tipo de movimiento**
-<|{tipo_sel}|selector|lov={tipos}|dropdown|on_change=on_change_tipo|>
+<|{tipo_sel}|selector|lov={tipos}|dropdown|value_by_id=True|on_change=on_change_tipo|>
 
 **Cuenta origen** (gasto / traspaso)
-<|{cuenta_origen_sel}|selector|lov={cuentas}|dropdown|>
+<|{cuenta_origen_sel}|selector|lov={cuentas}|dropdown|value_by_id=True|>
 
 **Cuenta destino** (ingreso / traspaso)
-<|{cuenta_destino_sel}|selector|lov={cuentas}|dropdown|>
+<|{cuenta_destino_sel}|selector|lov={cuentas}|dropdown|value_by_id=True|>
 
 **Quién envía** (solo ingreso)
-<|{persona_origen_sel}|selector|lov={personas}|dropdown|>
+<|{persona_origen_sel}|selector|lov={personas}|dropdown|value_by_id=True|>
 |>
 
 <|
@@ -122,10 +117,10 @@ pagina_formulario = """
 <|{persona_destino_texto}|input|>
 
 **Medio**
-<|{medio_sel}|selector|lov={medios}|dropdown|>
+<|{medio_sel}|selector|lov={medios}|dropdown|value_by_id=True|>
 
 **Categoría**
-<|{categoria_sel}|selector|lov={categorias_filtradas}|dropdown|>
+<|{categoria_sel}|selector|lov={categorias_lov}|dropdown|value_by_id=True|>
 
 **Monto (S/. o USD según cuenta)**
 <|{monto_str}|input|>
